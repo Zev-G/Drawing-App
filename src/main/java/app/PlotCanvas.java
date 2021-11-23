@@ -1,14 +1,22 @@
 package app;
 
+import com.me.tmw.nodes.util.NodeMisc;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.scene.SnapshotResult;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.image.Image;
+import javafx.util.Callback;
+
+import java.util.Stack;
 
 public class PlotCanvas extends Canvas {
 
     private final DoubleProperty x = new SimpleDoubleProperty();
     private final DoubleProperty y = new SimpleDoubleProperty();
     private final InfiniDraw infiniDraw;
+
+    private final Stack<Image> history = new Stack<>();
 
     public PlotCanvas(double w, double h, InfiniDraw draw) {
         super(w, h);
@@ -44,6 +52,17 @@ public class PlotCanvas extends Canvas {
 
     public InfiniDraw getInfiniDraw() {
         return infiniDraw;
+    }
+
+    public Stack<Image> getHistory() {
+        return history;
+    }
+
+    public void pushToHistory() {
+        snapshot(param -> {
+            history.add(param.getImage());
+            return null;
+        }, NodeMisc.TRANSPARENT_SNAPSHOT_PARAMETERS, null);
     }
 
 }

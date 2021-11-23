@@ -1,27 +1,24 @@
 package app;
 
 import com.me.tmw.debug.util.Debugger;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class InfiniDraw extends Pane {
 
-    private static final double SIZE = 500;
+    private static final double SIZE = 150;
 
     private final Map<Plot, PlotCanvas> canvasMap = new HashMap<>();
-    
+    private final Stack<Set<PlotCanvas>> history = new Stack<>();
+    private Set<PlotCanvas> effectedCanvases = new HashSet<>();
+
     private final DoubleProperty xOffset = new SimpleDoubleProperty();
     private final DoubleProperty yOffset = new SimpleDoubleProperty();
     
@@ -34,18 +31,34 @@ public class InfiniDraw extends Pane {
     private double lastDrawY;
 
     private DoubleProperty brushSize = new SimpleDoubleProperty(5);
+    private BooleanProperty drawing = new SimpleBooleanProperty(false);
 
     private StringProperty debug = new SimpleStringProperty();
 
     public InfiniDraw() {
         setOnMousePressed(event -> {
             dragging = true;
+            drawing.set(true);
             startX = event.getX();
             startY = event.getY();
             xOffsetI = getXOffset();
             yOffsetI = getYOffset();
             lastDrawX = startX;
             lastDrawY = startY;
+            effectedCanvases = new HashSet<>();
+        });
+        setFocusTraversable(true);
+        setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.Z && event.isControlDown() && !history.isEmpty()) {
+                Set<PlotCanvas> revert = history.pop();
+                for (PlotCanvas canvas : revert) {
+                    if (!canvas.getHistory().isEmpty()) canvas.getHistory().pop();
+                    canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+                    if (!canvas.getHistory().isEmpty()) {
+                        canvas.getGraphicsContext2D().drawImage(canvas.getHistory().pop(), 0, 0);
+                    }
+                }
+            }
         });
         Debugger.showProperty(debug, this);
         setOnScroll(scrollEvent -> {
@@ -80,7 +93,14 @@ public class InfiniDraw extends Pane {
                 setYOffset(deltaY + yOffsetI);
             }
         });
-        setOnMouseReleased(event -> dragging = false);
+        setOnMouseReleased(event -> {
+            dragging = false;
+            for (PlotCanvas effectedCanvas : effectedCanvases) {
+                effectedCanvas.pushToHistory();
+            }
+            history.add(effectedCanvases);
+            drawing.set(true);
+        });
     }
 
     private void drawBetween(double xOld, double yOld, double x, double y, double w, double h) {
@@ -122,6 +142,9 @@ public class InfiniDraw extends Pane {
         unique.add(bottomRight);
         for (PlotCanvas canvas : unique) {
             drawRelative(canvas, x, y, w, h);
+            if (drawing.get()) {
+                effectedCanvases.add(canvas);
+            }
         }
     }
 
@@ -146,8 +169,8 @@ public class InfiniDraw extends Pane {
         PlotCanvas canvas = new PlotCanvas(SIZE, SIZE, this);
         canvas.setX(plotX * SIZE);
         canvas.setY(plotY * SIZE);
-        canvas.getGraphicsContext2D().setFill(Color.WHITE);
-        canvas.getGraphicsContext2D().fillRect(0, 0, SIZE, SIZE);
+//        canvas.getGraphicsContext2D().setFill(Color.WHITE);
+//        canvas.getGraphicsContext2D().fillRect(0, 0, SIZE, SIZE);
         canvas.getGraphicsContext2D().setFill(Color.web("#7a362f"));
         getChildren().add(canvas);
         canvasMap.put(plot, canvas);
