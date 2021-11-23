@@ -65,4 +65,12 @@ public class PlotCanvas extends Canvas {
         }, NodeMisc.TRANSPARENT_SNAPSHOT_PARAMETERS, null);
     }
 
+    public void clear() {
+        getGraphicsContext2D().clearRect(0, 0, getWidth(), getHeight());
+    }
+
+    public void loadImage(Image image) {
+        getGraphicsContext2D().drawImage(image, 0, 0);
+    }
+
 }

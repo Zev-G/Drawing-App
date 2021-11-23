@@ -16,7 +16,7 @@ public class InfiniDraw extends Pane {
     private static final double SIZE = 150;
 
     private final Map<Plot, PlotCanvas> canvasMap = new HashMap<>();
-    private final Stack<Set<PlotCanvas>> history = new Stack<>();
+    private final Stack<Edit> history = new Stack<>();
     private Set<PlotCanvas> effectedCanvases = new HashSet<>();
 
     private final DoubleProperty xOffset = new SimpleDoubleProperty();
@@ -50,14 +50,7 @@ public class InfiniDraw extends Pane {
         setFocusTraversable(true);
         setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.Z && event.isControlDown() && !history.isEmpty()) {
-                Set<PlotCanvas> revert = history.pop();
-                for (PlotCanvas canvas : revert) {
-                    if (!canvas.getHistory().isEmpty()) canvas.getHistory().pop();
-                    canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-                    if (!canvas.getHistory().isEmpty()) {
-                        canvas.getGraphicsContext2D().drawImage(canvas.getHistory().pop(), 0, 0);
-                    }
-                }
+                history.pop().undo();
             }
         });
         Debugger.showProperty(debug, this);
@@ -95,10 +88,7 @@ public class InfiniDraw extends Pane {
         });
         setOnMouseReleased(event -> {
             dragging = false;
-            for (PlotCanvas effectedCanvas : effectedCanvases) {
-                effectedCanvas.pushToHistory();
-            }
-            history.add(effectedCanvases);
+            history.add(new CanvasEdit(effectedCanvases));
             drawing.set(true);
         });
     }
