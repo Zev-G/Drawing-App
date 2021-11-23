@@ -2,11 +2,14 @@ package app;
 
 import com.me.tmw.debug.util.Debugger;
 import javafx.beans.property.*;
-import javafx.scene.Parent;
-import javafx.scene.canvas.Canvas;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.scene.control.SelectionModel;
+import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 import java.util.*;
@@ -17,7 +20,20 @@ public class InfiniDraw extends Pane {
 
     private final Map<Plot, PlotCanvas> canvasMap = new HashMap<>();
     private final Stack<Edit> history = new Stack<>();
-    private Set<PlotCanvas> effectedCanvases = new HashSet<>();
+    private final ObservableList<Tool> tools = FXCollections.observableArrayList();
+    private final SelectionModel<Tool> toolSelectionModel = new SingleSelectionModel<>() {
+        @Override
+        protected Tool getModelItem(int i) {
+            return tools.get(i);
+        }
+
+        @Override
+        protected int getItemCount() {
+            return tools.size();
+        }
+    };
+
+    private final VBox icons = new VBox();
 
     private final DoubleProperty xOffset = new SimpleDoubleProperty();
     private final DoubleProperty yOffset = new SimpleDoubleProperty();
@@ -27,25 +43,43 @@ public class InfiniDraw extends Pane {
     private double xOffsetI;
     private double yOffsetI;
     private boolean dragging = false;
-    private double lastDrawX;
-    private double lastDrawY;
-
-    private DoubleProperty brushSize = new SimpleDoubleProperty(5);
-    private BooleanProperty drawing = new SimpleBooleanProperty(false);
 
     private StringProperty debug = new SimpleStringProperty();
 
+
     public InfiniDraw() {
+
+        getChildren().add(icons);
+        icons.setLayoutX(10);
+        icons.setLayoutY(10);
+        tools.addListener((ListChangeListener<Tool>) change -> {
+            while (change.next()) {
+                if (change.wasAdded()) {
+                    for (Tool added : change.getAddedSubList()) {
+                        icons.getChildren().add(added.getIcon());
+                    }
+                }
+                if (change.wasRemoved()) {
+                    for (Tool removed : change.getRemoved()) {
+                        icons.getChildren().remove(removed.getDrawing());
+                    }
+                }
+            }
+        });
+        tools.add(new DrawTool(this));
+
+        toolSelectionModel.selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (oldValue != null) oldValue.setSelected(false);
+            if (newValue != null) newValue.setSelected(true);
+        });
+        toolSelectionModel.select(0);
         setOnMousePressed(event -> {
             dragging = true;
-            drawing.set(true);
             startX = event.getX();
             startY = event.getY();
             xOffsetI = getXOffset();
             yOffsetI = getYOffset();
-            lastDrawX = startX;
-            lastDrawY = startY;
-            effectedCanvases = new HashSet<>();
+            getSelectedTool().handleMousePressed(event);
         });
         setFocusTraversable(true);
         setOnKeyPressed(event -> {
@@ -72,14 +106,8 @@ public class InfiniDraw extends Pane {
             }
         });
         setOnMouseDragged(event -> {
-            if (event.getButton() == MouseButton.PRIMARY && !event.isShiftDown()) {
-                double x = event.getX();
-                double y = event.getY();
-                drawBetween(lastDrawX, lastDrawY, x, y, brushSize.get(), brushSize.get());
-//                draw(x, y, brushSize.get(), brushSize.get());
-                lastDrawX = x;
-                lastDrawY = y;
-            } else if (dragging) {
+            getSelectedTool().handleMouseDragged(event);
+            if (dragging && getSelectedTool().isDraggable(event)) {
                 double deltaX = event.getX() - startX;
                 double deltaY = event.getY() - startY;
                 setXOffset(deltaX + xOffsetI);
@@ -87,67 +115,16 @@ public class InfiniDraw extends Pane {
             }
         });
         setOnMouseReleased(event -> {
+            getSelectedTool().handleMouseReleased(event);
             dragging = false;
-            history.add(new CanvasEdit(effectedCanvases));
-            drawing.set(true);
         });
     }
 
-    private void drawBetween(double xOld, double yOld, double x, double y, double w, double h) {
-        double step = Math.sqrt(Math.pow(w / 3, 2) + Math.pow(h / 3, 2));
-        double hyp = Math.sqrt(Math.pow(x - xOld, 2) + Math.pow(y - yOld, 2));
-        if (hyp > step) {
-            double deg = Math.atan((x - xOld) / (y - yOld));
-
-            boolean xNeg = x - xOld < 0;
-            boolean yNeg = y - yOld < 0;
-
-            double xStep = Math.sin(deg) * step;
-            if ((xNeg && yNeg) || (!xNeg && yNeg)) xStep *= -1;
-            double yStep = Math.cos(deg) * step;
-            if (yNeg) yStep *= -1;
-
-            double newX = xOld;
-            double newY = yOld;
-            do {
-                newX += xStep;
-                newY += yStep;
-                draw(newX, newY, w, h);
-                hyp = Math.sqrt(Math.pow(x - newX, 2) + Math.pow(y - newY, 2));
-            } while (hyp > step);
-        } else {
-            draw(x, y, w, h);
-        }
+    public SelectionModel<Tool> getToolSelectionModel() {
+        return toolSelectionModel;
     }
 
-    private void draw(double x, double y, double w, double h) {
-        PlotCanvas topLeft = find(x - w, y - h);
-        PlotCanvas topRight = find(x + w, y - h);
-        PlotCanvas bottomLeft = find(x - w, y + h);
-        PlotCanvas bottomRight = find(x + w, y + h);
-        Set<PlotCanvas> unique = new HashSet<>();
-        unique.add(topLeft);
-        unique.add(topRight);
-        unique.add(bottomLeft);
-        unique.add(bottomRight);
-        for (PlotCanvas canvas : unique) {
-            drawRelative(canvas, x, y, w, h);
-            if (drawing.get()) {
-                effectedCanvases.add(canvas);
-            }
-        }
-    }
-
-    private void drawRelative(PlotCanvas canvas, double x, double y, double w, double h) {
-        double relativeToCanvasX = x - canvas.getLayoutX();
-        double relativeToCanvasY = y - canvas.getLayoutY();
-        canvas.getGraphicsContext2D().fillRect(
-                relativeToCanvasX, relativeToCanvasY,
-                w, h
-        );
-    }
-
-    private PlotCanvas find(double x, double y) {
+    public PlotCanvas find(double x, double y) {
         int plotX = (int) ((x - getXOffset()) / SIZE);
         int plotY = (int) ((y - getYOffset()) / SIZE);
         if (x - getXOffset() < 0) plotX--;
@@ -194,6 +171,14 @@ public class InfiniDraw extends Pane {
 
     public void setYOffset(double yOffset) {
         this.yOffset.set(yOffset);
+    }
+
+    public Stack<Edit> getHistory() {
+        return history;
+    }
+
+    public Tool getSelectedTool() {
+        return toolSelectionModel.getSelectedItem();
     }
 
 }
