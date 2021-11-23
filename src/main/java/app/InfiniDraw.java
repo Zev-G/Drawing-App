@@ -1,7 +1,10 @@
 package app;
 
+import com.me.tmw.debug.util.Debugger;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.MouseButton;
@@ -15,7 +18,7 @@ import java.util.Set;
 
 public class InfiniDraw extends Pane {
 
-    private static final double SIZE = 20;
+    private static final double SIZE = 500;
 
     private final Map<Plot, PlotCanvas> canvasMap = new HashMap<>();
     
@@ -27,6 +30,12 @@ public class InfiniDraw extends Pane {
     private double xOffsetI;
     private double yOffsetI;
     private boolean dragging = false;
+    private double lastDrawX;
+    private double lastDrawY;
+
+    private DoubleProperty brushSize = new SimpleDoubleProperty(5);
+
+    private StringProperty debug = new SimpleStringProperty();
 
     public InfiniDraw() {
         setOnMousePressed(event -> {
@@ -35,10 +44,35 @@ public class InfiniDraw extends Pane {
             startY = event.getY();
             xOffsetI = getXOffset();
             yOffsetI = getYOffset();
+            lastDrawX = startX;
+            lastDrawY = startY;
+        });
+        Debugger.showProperty(debug, this);
+        setOnScroll(scrollEvent -> {
+            if (scrollEvent.isControlDown()) {
+                int mult = scrollEvent.getDeltaY() > 0 ? 1 : -1;
+                setScaleX(getScaleX() + (
+                        0.1 * mult
+                ));
+                setScaleY(getScaleY() + (
+                        0.1 * mult
+                ));
+            } else {
+//                if (scrollEvent.getDeltaY() > 0) {
+//                    brushSize.set(brushSize.get() + 1);
+//                } else if (brushSize.get() > 1) {
+//                    brushSize.set(brushSize.get() - 1);
+//                }
+            }
         });
         setOnMouseDragged(event -> {
-            if (event.getButton() == MouseButton.PRIMARY) {
-                draw(event.getX(), event.getY(), 6, 6);
+            if (event.getButton() == MouseButton.PRIMARY && !event.isShiftDown()) {
+                double x = event.getX();
+                double y = event.getY();
+                drawBetween(lastDrawX, lastDrawY, x, y, brushSize.get(), brushSize.get());
+//                draw(x, y, brushSize.get(), brushSize.get());
+                lastDrawX = x;
+                lastDrawY = y;
             } else if (dragging) {
                 double deltaX = event.getX() - startX;
                 double deltaY = event.getY() - startY;
@@ -47,6 +81,33 @@ public class InfiniDraw extends Pane {
             }
         });
         setOnMouseReleased(event -> dragging = false);
+    }
+
+    private void drawBetween(double xOld, double yOld, double x, double y, double w, double h) {
+        double step = Math.sqrt(Math.pow(w / 3, 2) + Math.pow(h / 3, 2));
+        double hyp = Math.sqrt(Math.pow(x - xOld, 2) + Math.pow(y - yOld, 2));
+        if (hyp > step) {
+            double deg = Math.atan((x - xOld) / (y - yOld));
+
+            boolean xNeg = x - xOld < 0;
+            boolean yNeg = y - yOld < 0;
+
+            double xStep = Math.sin(deg) * step;
+            if ((xNeg && yNeg) || (!xNeg && yNeg)) xStep *= -1;
+            double yStep = Math.cos(deg) * step;
+            if (yNeg) yStep *= -1;
+
+            double newX = xOld;
+            double newY = yOld;
+            do {
+                newX += xStep;
+                newY += yStep;
+                draw(newX, newY, w, h);
+                hyp = Math.sqrt(Math.pow(x - newX, 2) + Math.pow(y - newY, 2));
+            } while (hyp > step);
+        } else {
+            draw(x, y, w, h);
+        }
     }
 
     private void draw(double x, double y, double w, double h) {
@@ -67,7 +128,7 @@ public class InfiniDraw extends Pane {
     private void drawRelative(PlotCanvas canvas, double x, double y, double w, double h) {
         double relativeToCanvasX = x - canvas.getLayoutX();
         double relativeToCanvasY = y - canvas.getLayoutY();
-        canvas.getGraphicsContext2D().fillOval(
+        canvas.getGraphicsContext2D().fillRect(
                 relativeToCanvasX, relativeToCanvasY,
                 w, h
         );
@@ -76,6 +137,8 @@ public class InfiniDraw extends Pane {
     private PlotCanvas find(double x, double y) {
         int plotX = (int) ((x - getXOffset()) / SIZE);
         int plotY = (int) ((y - getYOffset()) / SIZE);
+        if (x - getXOffset() < 0) plotX--;
+        if (y - getYOffset() < 0) plotY--;
 
         Plot plot = new Plot(plotX, plotY);
         if (canvasMap.containsKey(plot)) return canvasMap.get(plot);
@@ -85,7 +148,7 @@ public class InfiniDraw extends Pane {
         canvas.setY(plotY * SIZE);
         canvas.getGraphicsContext2D().setFill(Color.WHITE);
         canvas.getGraphicsContext2D().fillRect(0, 0, SIZE, SIZE);
-        canvas.getGraphicsContext2D().setFill(Color.BLUE);
+        canvas.getGraphicsContext2D().setFill(Color.web("#7a362f"));
         getChildren().add(canvas);
         canvasMap.put(plot, canvas);
 
