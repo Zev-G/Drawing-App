@@ -1,5 +1,6 @@
-package app;
+package app.tools;
 
+import app.InfiniDraw;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Node;

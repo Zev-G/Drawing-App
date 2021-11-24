@@ -1,24 +1,28 @@
 package app;
 
+import app.history.Edit;
+import app.tools.DrawTool;
+import app.tools.MovingTool;
+import app.tools.Tool;
 import com.me.tmw.debug.util.Debugger;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 
 import java.util.*;
 
-public class InfiniDraw extends Pane {
+public class InfiniDraw extends VBox {
 
-    private static final double SIZE = 150;
-
-    private final Map<Plot, PlotCanvas> canvasMap = new HashMap<>();
     private final Stack<Edit> history = new Stack<>();
     private final ObservableList<Tool> tools = FXCollections.observableArrayList();
     private final SelectionModel<Tool> toolSelectionModel = new SingleSelectionModel<>() {
@@ -32,11 +36,16 @@ public class InfiniDraw extends Pane {
             return tools.size();
         }
     };
-
-    private final VBox icons = new VBox();
+    private final ObservableList<Layer> layers = FXCollections.observableArrayList();
 
     private final DoubleProperty xOffset = new SimpleDoubleProperty();
     private final DoubleProperty yOffset = new SimpleDoubleProperty();
+    private StringProperty debug = new SimpleStringProperty();
+
+    private final HBox toolBar = new HBox();
+    private final StackPane body = new StackPane();
+    private final VBox icons = new VBox();
+    private final StackPane layersView = new StackPane();
     
     private double startX;
     private double startY;
@@ -44,19 +53,35 @@ public class InfiniDraw extends Pane {
     private double yOffsetI;
     private boolean dragging = false;
 
-    private StringProperty debug = new SimpleStringProperty();
-
-
     public InfiniDraw() {
+        getChildren().addAll(toolBar, body);
+        VBox.setVgrow(body, Priority.ALWAYS);
+        body.getChildren().addAll(layersView, icons);
 
-        getChildren().add(icons);
-        icons.setLayoutX(10);
-        icons.setLayoutY(10);
+        layers.addListener((ListChangeListener<Layer>) change -> {
+            while (change.next()) {
+                if (change.wasAdded()) {
+                    for (Layer added : change.getAddedSubList()) {
+                        layersView.getChildren().add(added.getView());
+                    }
+                }
+                if (change.wasRemoved()) {
+                    for (Layer removed : change.getAddedSubList()) {
+                        layersView.getChildren().remove(removed.getView());
+                    }
+                }
+            }
+        });
+
+        icons.setPadding(new Insets(10));
+        icons.setAlignment(Pos.CENTER_LEFT);
+        icons.setSpacing(10);
         tools.addListener((ListChangeListener<Tool>) change -> {
             while (change.next()) {
                 if (change.wasAdded()) {
                     for (Tool added : change.getAddedSubList()) {
                         icons.getChildren().add(added.getIcon());
+                        added.setSelected(false);
                     }
                 }
                 if (change.wasRemoved()) {
@@ -66,7 +91,7 @@ public class InfiniDraw extends Pane {
                 }
             }
         });
-        tools.add(new DrawTool(this));
+        tools.addAll(new DrawTool(this), new MovingTool(this));
 
         toolSelectionModel.selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
             if (oldValue != null) oldValue.setSelected(false);
@@ -124,31 +149,6 @@ public class InfiniDraw extends Pane {
         return toolSelectionModel;
     }
 
-    public PlotCanvas find(double x, double y) {
-        int plotX = (int) ((x - getXOffset()) / SIZE);
-        int plotY = (int) ((y - getYOffset()) / SIZE);
-        if (x - getXOffset() < 0) plotX--;
-        if (y - getYOffset() < 0) plotY--;
-
-        Plot plot = new Plot(plotX, plotY);
-        if (canvasMap.containsKey(plot)) return canvasMap.get(plot);
-
-        PlotCanvas canvas = new PlotCanvas(SIZE, SIZE, this);
-        canvas.setX(plotX * SIZE);
-        canvas.setY(plotY * SIZE);
-//        canvas.getGraphicsContext2D().setFill(Color.WHITE);
-//        canvas.getGraphicsContext2D().fillRect(0, 0, SIZE, SIZE);
-        canvas.getGraphicsContext2D().setFill(Color.web("#7a362f"));
-        getChildren().add(canvas);
-        canvasMap.put(plot, canvas);
-
-        return canvas;
-    }
-
-    public Map<Plot, PlotCanvas> getCanvasMap() {
-        return canvasMap;
-    }
-
     public double getXOffset() {
         return xOffset.get();
     }
@@ -179,6 +179,19 @@ public class InfiniDraw extends Pane {
 
     public Tool getSelectedTool() {
         return toolSelectionModel.getSelectedItem();
+    }
+
+    public HBox getToolBar() {
+        return toolBar;
+    }
+
+    public ObservableList<Layer> getLayers() {
+        return layers;
+    }
+
+    public Layer getLastLayer() {
+        if (layers.isEmpty()) return null;
+        else return layers.get(layers.size() - 1);
     }
 
 }

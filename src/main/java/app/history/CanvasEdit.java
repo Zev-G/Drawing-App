@@ -1,5 +1,6 @@
-package app;
+package app.history;
 
+import app.PlotCanvas;
 import javafx.scene.image.Image;
 
 import java.util.Collection;

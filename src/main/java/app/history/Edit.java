@@ -1,4 +1,4 @@
-package app;
+package app.history;
 
 public abstract class Edit {
 
