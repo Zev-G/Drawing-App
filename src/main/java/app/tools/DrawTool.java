@@ -35,6 +35,33 @@ public class DrawTool extends IconPreviewTool {
 
     }
 
+    @Override
+    public void handleMousePressed(MouseEvent event) {
+        currentlyDrawing.set(true);
+        effectedCanvases = new HashSet<>();
+        lastDrawX = event.getX();
+        lastDrawY = event.getY();
+        handleMouseDragged(event);
+    }
+
+    @Override
+    public void handleMouseDragged(MouseEvent event) {
+        if (!isDraggable(event)) {
+            double x = event.getX();
+            double y = event.getY();
+            drawBetween(lastDrawX, lastDrawY, x, y);
+//                draw(x, y, brushSize.get(), brushSize.get());
+            lastDrawX = x;
+            lastDrawY = y;
+        }
+    }
+
+    @Override
+    public void handleMouseReleased(MouseEvent event) {
+        if (!effectedCanvases.isEmpty()) drawing.getHistory().add(new CanvasEdit(effectedCanvases));
+        currentlyDrawing.set(false);
+    }
+
     private void drawBetween(double xOld, double yOld, double x, double y) {
         Brush brush = getBrush();
         double w = brush.getWidth();
@@ -103,33 +130,6 @@ public class DrawTool extends IconPreviewTool {
         double relativeToCanvasX = x - canvas.getLayoutX();
         double relativeToCanvasY = y - canvas.getLayoutY();
         getBrush().draw(canvas.getGraphicsContext2D(), relativeToCanvasX, relativeToCanvasY);
-    }
-
-    @Override
-    public void handleMousePressed(MouseEvent event) {
-        currentlyDrawing.set(true);
-        effectedCanvases = new HashSet<>();
-        lastDrawX = event.getX();
-        lastDrawY = event.getY();
-        handleMouseDragged(event);
-    }
-
-    @Override
-    public void handleMouseDragged(MouseEvent event) {
-        if (!isDraggable(event)) {
-            double x = event.getX();
-            double y = event.getY();
-            drawBetween(lastDrawX, lastDrawY, x, y);
-//                draw(x, y, brushSize.get(), brushSize.get());
-            lastDrawX = x;
-            lastDrawY = y;
-        }
-    }
-
-    @Override
-    public void handleMouseReleased(MouseEvent event) {
-        drawing.getHistory().add(new CanvasEdit(effectedCanvases));
-        currentlyDrawing.set(false);
     }
 
     @Override

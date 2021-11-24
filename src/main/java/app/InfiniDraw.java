@@ -9,15 +9,10 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 
 import java.util.*;
 
@@ -44,7 +39,7 @@ public class InfiniDraw extends VBox {
 
     private final HBox toolBar = new HBox();
     private final StackPane body = new StackPane();
-    private final VBox icons = new VBox();
+    private final SideBar sideBar = new SideBar(this);
     private final StackPane layersView = new StackPane();
     
     private double startX;
@@ -56,7 +51,9 @@ public class InfiniDraw extends VBox {
     public InfiniDraw() {
         getChildren().addAll(toolBar, body);
         VBox.setVgrow(body, Priority.ALWAYS);
-        body.getChildren().addAll(layersView, icons);
+        BorderPane sideBarHolder = new BorderPane();
+        sideBarHolder.setLeft(sideBar);
+        body.getChildren().addAll(layersView, sideBarHolder);
 
         layers.addListener((ListChangeListener<Layer>) change -> {
             while (change.next()) {
@@ -73,24 +70,6 @@ public class InfiniDraw extends VBox {
             }
         });
 
-        icons.setPadding(new Insets(10));
-        icons.setAlignment(Pos.CENTER_LEFT);
-        icons.setSpacing(10);
-        tools.addListener((ListChangeListener<Tool>) change -> {
-            while (change.next()) {
-                if (change.wasAdded()) {
-                    for (Tool added : change.getAddedSubList()) {
-                        icons.getChildren().add(added.getIcon());
-                        added.setSelected(false);
-                    }
-                }
-                if (change.wasRemoved()) {
-                    for (Tool removed : change.getRemoved()) {
-                        icons.getChildren().remove(removed.getDrawing());
-                    }
-                }
-            }
-        });
         tools.addAll(new DrawTool(this), new MovingTool(this));
 
         toolSelectionModel.selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
@@ -192,6 +171,10 @@ public class InfiniDraw extends VBox {
     public Layer getLastLayer() {
         if (layers.isEmpty()) return null;
         else return layers.get(layers.size() - 1);
+    }
+
+    public ObservableList<Tool> getTools() {
+        return tools;
     }
 
 }
