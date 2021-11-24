@@ -10,12 +10,12 @@ public class CircleBrush extends Brush {
 
     @Override
     public double getWidth() {
-        return tool.getBrushSize() / 2;
+        return tool.getBrushSize();
     }
 
     @Override
     public double getHeight() {
-        return tool.getBrushSize() / 2;
+        return tool.getBrushSize();
     }
 
     @Override

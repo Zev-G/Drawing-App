@@ -6,6 +6,9 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.SnapshotResult;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
 import java.util.Stack;
@@ -22,8 +25,21 @@ public class PlotCanvas extends Canvas {
         super(w, h);
         this.infiniDraw = draw;
 
+        history.add(blankImage((int) Math.round(w), (int) Math.round(h)));
+
         layoutXProperty().bind(x.add(infiniDraw.xOffsetProperty()));
         layoutYProperty().bind(y.add(infiniDraw.yOffsetProperty()));
+    }
+
+    private Image blankImage(int w, int h) {
+        WritableImage image = new WritableImage(w, h);
+        PixelWriter writer = image.getPixelWriter();
+        for (int x = 0; x < w; x++) {
+            for (int y = 0; y < h; y++) {
+                writer.setColor(x, y, Color.TRANSPARENT);
+            }
+        }
+        return image;
     }
 
     public double getX() {
@@ -73,4 +89,7 @@ public class PlotCanvas extends Canvas {
         getGraphicsContext2D().drawImage(image, 0, 0);
     }
 
+    public void clearHistory() {
+        history.clear();
+    }
 }

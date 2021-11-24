@@ -1,15 +1,19 @@
 package app.tools;
 
+import app.EditableProperty;
 import app.InfiniDraw;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 
 public abstract class Tool {
 
     protected final InfiniDraw drawing;
-    protected BooleanProperty selected = new SimpleBooleanProperty();
+    protected final BooleanProperty selected = new SimpleBooleanProperty();
+    protected final ObservableList<EditableProperty<?>> editableProperties = FXCollections.observableArrayList();
 
     public Tool(InfiniDraw drawing) {
         this.drawing = drawing;
@@ -37,4 +41,9 @@ public abstract class Tool {
     public void setSelected(boolean selected) {
         this.selected.set(selected);
     }
+
+    public ObservableList<EditableProperty<?>> getEditableProperties() {
+        return editableProperties;
+    }
+
 }

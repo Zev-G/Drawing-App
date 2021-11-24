@@ -1,10 +1,12 @@
 package app.tools;
 
+import app.EditableProperty;
 import app.PaintLayer;
 import app.history.CanvasEdit;
 import app.InfiniDraw;
 import app.PlotCanvas;
 import com.me.tmw.nodes.control.svg.SVG;
+import com.me.tmw.properties.editors.DoublePropertyEditor;
 import javafx.beans.property.*;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
@@ -15,7 +17,10 @@ import java.util.Set;
 
 public class DrawTool extends IconPreviewTool {
 
-    private DoubleProperty brushSize = new SimpleDoubleProperty(5);
+    private static final boolean DRAW_BETWEEN = true;
+    private static final boolean DRAW_THROUGH_CANVASES = true;
+
+    private DoubleProperty brushSize = new SimpleDoubleProperty(this, "Brush Size", 15);
     private ObjectProperty<Brush> brush = new SimpleObjectProperty<>(new CircleBrush(this));
 
     private BooleanProperty currentlyDrawing = new SimpleBooleanProperty(false);
@@ -32,7 +37,7 @@ public class DrawTool extends IconPreviewTool {
                 , 0.05));
         shortcut.set(KeyCombination.valueOf("B"));
 
-
+        editableProperties.add(EditableProperty.create(brushSize, () -> new DoublePropertyEditor(brushSize)));
     }
 
     @Override
@@ -49,8 +54,17 @@ public class DrawTool extends IconPreviewTool {
         if (!isDraggable(event)) {
             double x = event.getX();
             double y = event.getY();
-            drawBetween(lastDrawX, lastDrawY, x, y);
-//                draw(x, y, brushSize.get(), brushSize.get());
+            if (DRAW_BETWEEN) {
+                drawBetween(lastDrawX, lastDrawY, x, y);
+            } else {
+                if (DRAW_THROUGH_CANVASES) {
+                    draw(x, y);
+                } else {
+                    PlotCanvas canvas = getTopPaintLayer().find(x, y);
+                    effectedCanvases.add(canvas);
+                    drawRelative(canvas, x, y);
+                }
+            }
             lastDrawX = x;
             lastDrawY = y;
         }
@@ -67,7 +81,7 @@ public class DrawTool extends IconPreviewTool {
         double w = brush.getWidth();
         double h = brush.getHeight();
 
-        double step = Math.sqrt(Math.pow(w / 3, 2) + Math.pow(h / 3, 2));
+        double step = Math.sqrt(Math.pow(w / 6, 2) + Math.pow(h / 6, 2));
         double hyp = Math.sqrt(Math.pow(x - xOld, 2) + Math.pow(y - yOld, 2));
         if (hyp > step) {
             double deg = Math.atan((x - xOld) / (y - yOld));

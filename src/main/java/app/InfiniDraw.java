@@ -37,7 +37,7 @@ public class InfiniDraw extends VBox {
     private final DoubleProperty yOffset = new SimpleDoubleProperty();
     private StringProperty debug = new SimpleStringProperty();
 
-    private final HBox toolBar = new HBox();
+    private final ToolBar toolBar = new ToolBar(this);
     private final StackPane body = new StackPane();
     private final SideBar sideBar = new SideBar(this);
     private final StackPane layersView = new StackPane();
@@ -49,7 +49,8 @@ public class InfiniDraw extends VBox {
     private boolean dragging = false;
 
     public InfiniDraw() {
-        getChildren().addAll(toolBar, body);
+        getChildren().addAll(body, toolBar);
+
         VBox.setVgrow(body, Priority.ALWAYS);
         BorderPane sideBarHolder = new BorderPane();
         sideBarHolder.setLeft(sideBar);
