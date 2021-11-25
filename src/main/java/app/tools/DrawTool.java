@@ -3,7 +3,7 @@ package app.tools;
 import app.EditableProperty;
 import app.PaintLayer;
 import app.history.CanvasEdit;
-import app.InfiniDraw;
+import app.Drawing;
 import app.PlotCanvas;
 import com.me.tmw.nodes.control.svg.SVG;
 import com.me.tmw.properties.ColorProperty;
@@ -36,7 +36,7 @@ public class DrawTool extends IconPreviewTool {
     private double lastDrawX;
     private double lastDrawY;
 
-    public DrawTool(InfiniDraw drawing) {
+    public DrawTool(Drawing drawing) {
         super(drawing);
 
         icon.setContent(SVG.resizePath(

@@ -13,9 +13,9 @@ public class PaintLayer extends Pane implements Layer {
     private static final double SIZE = 150;
 
     private final Map<Plot, PlotCanvas> canvasMap = new HashMap<>();
-    private final InfiniDraw drawing;
+    private final Drawing drawing;
 
-    public PaintLayer(InfiniDraw drawing) {
+    public PaintLayer(Drawing drawing) {
         this.drawing = drawing;
     }
 

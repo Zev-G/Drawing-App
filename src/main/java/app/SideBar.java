@@ -10,10 +10,10 @@ import javafx.scene.paint.Color;
 
 public class SideBar extends StackPane {
 
-    private final InfiniDraw drawing;
+    private final Drawing drawing;
     private final VBox icons = new VBox();
 
-    public SideBar(InfiniDraw drawing) {
+    public SideBar(Drawing drawing) {
         this.drawing = drawing;
 
         StackPane iconsGloss = new StackPane();

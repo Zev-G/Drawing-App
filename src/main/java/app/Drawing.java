@@ -19,7 +19,9 @@ import javafx.scene.layout.*;
 
 import java.util.*;
 
-public class InfiniDraw extends AnchorPane {
+public class Drawing extends AnchorPane {
+
+    private static final String STYLE_SHEET = Res.css("main");
 
     private final Stack<Edit> history = new Stack<>();
     private final ObservableList<Tool> tools = FXCollections.observableArrayList();
@@ -47,6 +49,8 @@ public class InfiniDraw extends AnchorPane {
     private final StackPane body = new StackPane();
     private final SideBar sideBar = new SideBar(this);
     private final StackPane layersView = new StackPane();
+
+    private final ScaleEditor scaleEditor = new ScaleEditor(scale, this);
     
     private double startX;
     private double startY;
@@ -54,8 +58,9 @@ public class InfiniDraw extends AnchorPane {
     private double yOffsetI;
     private boolean dragging = false;
 
-    public InfiniDraw() {
-        getChildren().addAll(body, toolBar);
+    public Drawing() {
+        getChildren().addAll(body, toolBar, scaleEditor);
+        getStylesheets().add(STYLE_SHEET);
 
         cursor.addListener(observable -> {
             cursorView.getChildren().clear();
@@ -68,6 +73,9 @@ public class InfiniDraw extends AnchorPane {
                 cursor.scaleYProperty().bind(scale);
             }
         });
+
+        AnchorPane.setRightAnchor(scaleEditor, 10D);
+        AnchorPane.setBottomAnchor(scaleEditor, 10D);
 
         AnchorPane.setTopAnchor(toolBar, 0D);
         AnchorPane.setLeftAnchor(toolBar, 0D);
@@ -143,19 +151,11 @@ public class InfiniDraw extends AnchorPane {
         Debugger.showProperty(debug, this);
         setOnScroll(scrollEvent -> {
             if (scrollEvent.isControlDown()) {
-                double newScale = getScale();
                 if (scrollEvent.getDeltaY() > 0) {
-                    newScale += calculateScaleChange(getScale());
-                    if (newScale + calculateScaleChange(newScale) > 1 && getScale() < 1) {
-                        newScale = 1;
-                    }
+                    increaseScale();
                 } else {
-                    newScale -= calculateScaleChange(getScale());
-                    if (newScale - calculateScaleChange(newScale)< 1 && getScale() > 1) {
-                        newScale = 1;
-                    }
+                    decreaseScale();
                 }
-                scale.set(newScale);
             }
         });
         layersView.scaleXProperty().bind(scale);
@@ -173,6 +173,22 @@ public class InfiniDraw extends AnchorPane {
             getSelectedTool().handleMouseReleased(event);
             dragging = false;
         });
+    }
+
+    public void increaseScale() {
+        double newScale = getScale() + calculateScaleChange(getScale());
+        if (newScale + calculateScaleChange(newScale) > 1 && getScale() < 1) {
+            newScale = 1;
+        }
+        setScale(newScale);
+    }
+
+    public void decreaseScale() {
+        double newScale = getScale() - calculateScaleChange(getScale());
+        if (newScale - calculateScaleChange(newScale)< 1 && getScale() > 1) {
+            newScale = 1;
+        }
+        setScale(newScale);
     }
 
     private double calculateScaleChange(double scale) {

@@ -1,6 +1,6 @@
 package app.tools;
 
-import app.InfiniDraw;
+import app.Drawing;
 import app.misc.FlatButton;
 import app.misc.Shortcuts;
 import com.me.tmw.properties.ColorProperty;
@@ -23,7 +23,7 @@ public abstract class IconPreviewTool extends Tool {
     protected final ColorProperty defaultColor = new ColorProperty();
     protected final ColorProperty selectedColor = new ColorProperty();
 
-    public IconPreviewTool(InfiniDraw drawing) {
+    public IconPreviewTool(Drawing drawing) {
         super(drawing);
 
         defaultColor.set(Color.WHITE);

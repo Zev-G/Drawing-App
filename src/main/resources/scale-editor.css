@@ -1,0 +1,23 @@
+.scale-editor {
+    -fx-alignment: center;
+    -fx-spacing: 10;
+
+    -fx-font-size: 20;
+    -fx-padding: 10 15;
+
+    -fx-background-color: -off-background;
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(three-pass-box, -near-black, 10, 0, 0, 0);
+}
+
+.scale-editor > * {
+    -fx-text-fill: -off-text-fill;
+}
+
+.decrement, .increment, .reset {
+    -fx-cursor: hand;
+}
+
+.reset {
+    -fx-fill: white;
+}

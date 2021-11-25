@@ -12,11 +12,11 @@ public class PlotCanvas extends Canvas {
 
     private final DoubleProperty x = new SimpleDoubleProperty();
     private final DoubleProperty y = new SimpleDoubleProperty();
-    private final InfiniDraw infiniDraw;
+    private final Drawing infiniDraw;
 
     private final Stack<Image> history = new Stack<>();
 
-    public PlotCanvas(double w, double h, InfiniDraw draw) {
+    public PlotCanvas(double w, double h, Drawing draw) {
         super(w, h);
         this.infiniDraw = draw;
 
@@ -48,7 +48,7 @@ public class PlotCanvas extends Canvas {
         this.y.set(y);
     }
 
-    public InfiniDraw getInfiniDraw() {
+    public Drawing getInfiniDraw() {
         return infiniDraw;
     }
 

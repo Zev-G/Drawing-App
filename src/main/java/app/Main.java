@@ -8,7 +8,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setScene(new DevScene(new InfiniDraw()));
+        primaryStage.setScene(new DevScene(new Drawing()));
         primaryStage.show();
     }
 

@@ -4,9 +4,9 @@ import javafx.scene.layout.HBox;
 
 public class ToolBar extends HBox {
 
-    private final InfiniDraw drawing;
+    private final Drawing drawing;
 
-    public ToolBar(InfiniDraw drawing) {
+    public ToolBar(Drawing drawing) {
         this.drawing = drawing;
 
         drawing.getToolSelectionModel().selectedItemProperty().addListener((observableValue, tool, t1) -> {
