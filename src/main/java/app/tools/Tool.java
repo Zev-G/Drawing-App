@@ -24,6 +24,8 @@ public abstract class Tool {
     public void handleMouseDragged(MouseEvent event) {}
     public boolean isDraggable(MouseEvent event) { return false; }
 
+    public Node getCursor() { return null; }
+
     public abstract Node getIcon();
 
     public InfiniDraw getDrawing() {

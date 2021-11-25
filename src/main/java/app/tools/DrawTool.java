@@ -6,11 +6,15 @@ import app.history.CanvasEdit;
 import app.InfiniDraw;
 import app.PlotCanvas;
 import com.me.tmw.nodes.control.svg.SVG;
+import com.me.tmw.properties.ColorProperty;
+import com.me.tmw.properties.editors.ColorPropertyEditor;
 import com.me.tmw.properties.editors.DoublePropertyEditor;
 import javafx.beans.property.*;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,6 +26,9 @@ public class DrawTool extends IconPreviewTool {
 
     private DoubleProperty brushSize = new SimpleDoubleProperty(this, "Brush Size", 15);
     private ObjectProperty<Brush> brush = new SimpleObjectProperty<>(new CircleBrush(this));
+    private ColorProperty brushColor = new ColorProperty(this, "Brush Color", Color.RED);
+
+    private final Circle cursor = new Circle();
 
     private BooleanProperty currentlyDrawing = new SimpleBooleanProperty(false);
     private Set<PlotCanvas> effectedCanvases = new HashSet<>();
@@ -37,23 +44,29 @@ public class DrawTool extends IconPreviewTool {
                 , 0.05));
         shortcut.set(KeyCombination.valueOf("B"));
 
+        cursor.radiusProperty().bind(brushSize.divide(2));
+        cursor.setStrokeWidth(1.5);
+        cursor.setStroke(Color.BLACK);
+        cursor.setFill(Color.TRANSPARENT);
+
         editableProperties.add(EditableProperty.create(brushSize, () -> new DoublePropertyEditor(brushSize)));
+        editableProperties.add(EditableProperty.create(brushColor, () -> new ColorPropertyEditor(brushColor)));
     }
 
     @Override
     public void handleMousePressed(MouseEvent event) {
         currentlyDrawing.set(true);
         effectedCanvases = new HashSet<>();
-        lastDrawX = event.getX();
-        lastDrawY = event.getY();
+        lastDrawX = event.getX() - getBrushSize() / 2;
+        lastDrawY = event.getY() - getBrushSize() / 2;
         handleMouseDragged(event);
     }
 
     @Override
     public void handleMouseDragged(MouseEvent event) {
-        if (!isDraggable(event)) {
-            double x = event.getX();
-            double y = event.getY();
+        if (!isDraggable(event) && isCurrentlyDrawing()) {
+            double x = event.getX() - getBrushSize() / 2;
+            double y = event.getY() - getBrushSize() / 2;
             if (DRAW_BETWEEN) {
                 drawBetween(lastDrawX, lastDrawY, x, y);
             } else {
@@ -143,12 +156,19 @@ public class DrawTool extends IconPreviewTool {
     private void drawRelative(PlotCanvas canvas, double x, double y) {
         double relativeToCanvasX = x - canvas.getLayoutX();
         double relativeToCanvasY = y - canvas.getLayoutY();
-        getBrush().draw(canvas.getGraphicsContext2D(), relativeToCanvasX, relativeToCanvasY);
+        canvas.getGraphicsContext2D().setFill(getBrushColor());
+
+        getBrush().draw(canvas.getGraphicsContext2D(), relativeToCanvasX , relativeToCanvasY);
     }
 
     @Override
     public boolean isDraggable(MouseEvent event) {
         return event.getButton() != MouseButton.PRIMARY || event.isShiftDown();
+    }
+
+    @Override
+    public Circle getCursor() {
+        return cursor;
     }
 
     public double getBrushSize() {
@@ -173,6 +193,22 @@ public class DrawTool extends IconPreviewTool {
 
     public void setBrush(Brush brush) {
         this.brush.set(brush);
+    }
+
+    public Color getBrushColor() {
+        return brushColor.get();
+    }
+
+    public ColorProperty brushColorProperty() {
+        return brushColor;
+    }
+
+    public void setBrushColor(Color brushColor) {
+        this.brushColor.set(brushColor);
+    }
+
+    public boolean isCurrentlyDrawing() {
+        return currentlyDrawing.get();
     }
 
 }

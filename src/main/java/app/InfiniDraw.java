@@ -5,10 +5,13 @@ import app.tools.DrawTool;
 import app.tools.MovingTool;
 import app.tools.Tool;
 import com.me.tmw.debug.util.Debugger;
+import com.me.tmw.properties.NodeProperty;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.input.KeyCode;
@@ -16,7 +19,7 @@ import javafx.scene.layout.*;
 
 import java.util.*;
 
-public class InfiniDraw extends VBox {
+public class InfiniDraw extends AnchorPane {
 
     private final Stack<Edit> history = new Stack<>();
     private final ObservableList<Tool> tools = FXCollections.observableArrayList();
@@ -32,12 +35,15 @@ public class InfiniDraw extends VBox {
         }
     };
     private final ObservableList<Layer> layers = FXCollections.observableArrayList();
+    private final NodeProperty cursor = new NodeProperty();
+    private final SimpleDoubleProperty scale = new SimpleDoubleProperty(1);
 
     private final DoubleProperty xOffset = new SimpleDoubleProperty();
     private final DoubleProperty yOffset = new SimpleDoubleProperty();
     private StringProperty debug = new SimpleStringProperty();
 
     private final ToolBar toolBar = new ToolBar(this);
+    private final Pane cursorView = new Pane();
     private final StackPane body = new StackPane();
     private final SideBar sideBar = new SideBar(this);
     private final StackPane layersView = new StackPane();
@@ -51,10 +57,39 @@ public class InfiniDraw extends VBox {
     public InfiniDraw() {
         getChildren().addAll(body, toolBar);
 
+        cursor.addListener(observable -> {
+            cursorView.getChildren().clear();
+            Node cursor = this.cursor.get();
+            if (cursor != null) {
+                cursorView.getChildren().add(cursor);
+                cursor.scaleXProperty().unbind();
+                cursor.scaleYProperty().unbind();
+                cursor.scaleXProperty().bind(scale);
+                cursor.scaleYProperty().bind(scale);
+            }
+        });
+
+        AnchorPane.setTopAnchor(toolBar, 0D);
+        AnchorPane.setLeftAnchor(toolBar, 0D);
+        AnchorPane.setRightAnchor(toolBar, 0D);
+
+        toolBar.setMinHeight(35);
+        AnchorPane.setTopAnchor(body, 35D);
+        AnchorPane.setBottomAnchor(body, 0D);
+        AnchorPane.setLeftAnchor(body, 0D);
+        AnchorPane.setRightAnchor(body, 0D);
+
+        layersView.setId("Layers View");
+
         VBox.setVgrow(body, Priority.ALWAYS);
         BorderPane sideBarHolder = new BorderPane();
         sideBarHolder.setLeft(sideBar);
-        body.getChildren().addAll(layersView, sideBarHolder);
+        sideBarHolder.setPickOnBounds(false);
+        body.setPickOnBounds(false);
+
+        body.getChildren().addAll(layersView, cursorView, sideBarHolder);
+
+        this.cursorView.setMouseTransparent(true);
 
         layers.addListener((ListChangeListener<Layer>) change -> {
             while (change.next()) {
@@ -74,18 +109,31 @@ public class InfiniDraw extends VBox {
         tools.addAll(new DrawTool(this), new MovingTool(this));
 
         toolSelectionModel.selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (oldValue != null) oldValue.setSelected(false);
-            if (newValue != null) newValue.setSelected(true);
+            if (oldValue != null) {
+                oldValue.setSelected(false);
+            }
+            cursorView.getChildren().clear();
+            if (newValue != null) {
+                newValue.setSelected(true);
+                Node cursor = newValue.getCursor();
+                if (cursor != null) {
+                    this.cursorView.getChildren().add(cursor);
+                }
+                this.cursor.set(cursor);
+            }
         });
         toolSelectionModel.select(0);
-        setOnMousePressed(event -> {
+        layersView.setOnMousePressed(event -> {
             dragging = true;
             startX = event.getX();
             startY = event.getY();
             xOffsetI = getXOffset();
             yOffsetI = getYOffset();
             getSelectedTool().handleMousePressed(event);
+            requestFocus();
         });
+        body.setOnMouseMoved(event -> updateCursor(event.getX(), event.getY()));
+        body.setOnMouseDragged(event -> updateCursor(event.getX(), event.getY()));
         setFocusTraversable(true);
         setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.Z && event.isControlDown() && !history.isEmpty()) {
@@ -95,22 +143,24 @@ public class InfiniDraw extends VBox {
         Debugger.showProperty(debug, this);
         setOnScroll(scrollEvent -> {
             if (scrollEvent.isControlDown()) {
-                int mult = scrollEvent.getDeltaY() > 0 ? 1 : -1;
-                setScaleX(getScaleX() + (
-                        0.1 * mult
-                ));
-                setScaleY(getScaleY() + (
-                        0.1 * mult
-                ));
-            } else {
-//                if (scrollEvent.getDeltaY() > 0) {
-//                    brushSize.set(brushSize.get() + 1);
-//                } else if (brushSize.get() > 1) {
-//                    brushSize.set(brushSize.get() - 1);
-//                }
+                double newScale = getScale();
+                if (scrollEvent.getDeltaY() > 0) {
+                    newScale += calculateScaleChange(getScale());
+                    if (newScale + calculateScaleChange(newScale) > 1 && getScale() < 1) {
+                        newScale = 1;
+                    }
+                } else {
+                    newScale -= calculateScaleChange(getScale());
+                    if (newScale - calculateScaleChange(newScale)< 1 && getScale() > 1) {
+                        newScale = 1;
+                    }
+                }
+                scale.set(newScale);
             }
         });
-        setOnMouseDragged(event -> {
+        layersView.scaleXProperty().bind(scale);
+        layersView.scaleYProperty().bind(scale);
+        layersView.setOnMouseDragged(event -> {
             getSelectedTool().handleMouseDragged(event);
             if (dragging && getSelectedTool().isDraggable(event)) {
                 double deltaX = event.getX() - startX;
@@ -119,10 +169,21 @@ public class InfiniDraw extends VBox {
                 setYOffset(deltaY + yOffsetI);
             }
         });
-        setOnMouseReleased(event -> {
+        layersView.setOnMouseReleased(event -> {
             getSelectedTool().handleMouseReleased(event);
             dragging = false;
         });
+    }
+
+    private double calculateScaleChange(double scale) {
+        return Math.max(0.01, Math.min(1, scale * 0.08));
+    }
+
+    private void updateCursor(double x, double y) {
+        if (!cursorView.getChildren().isEmpty()) {
+            cursor.get().setLayoutX(x);
+            cursor.get().setLayoutY(y);
+        }
     }
 
     public SelectionModel<Tool> getToolSelectionModel() {
@@ -176,6 +237,18 @@ public class InfiniDraw extends VBox {
 
     public ObservableList<Tool> getTools() {
         return tools;
+    }
+
+    public double getScale() {
+        return scale.get();
+    }
+
+    public SimpleDoubleProperty scaleProperty() {
+        return scale;
+    }
+
+    public void setScale(double scale) {
+        this.scale.set(scale);
     }
 
 }
