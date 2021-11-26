@@ -20,10 +20,11 @@ public class SideBar extends StackPane {
         this.drawing = drawing;
 
         EffectPassThroughPane iconsGloss = new EffectPassThroughPane(drawing.getLayersView());
+        iconsGloss.setTranslateX(-7.5);
 
         BoxBlur blur = new BoxBlur(15, 15, 3);
         iconsGloss.setEffect(blur);
-        blur.setInput(new ColorAdjust(0, 0, 0.4, 0));
+        blur.setInput(new ColorAdjust(0, 0, 0.2, 0));
 
         iconsGloss.setMouseTransparent(true);
 

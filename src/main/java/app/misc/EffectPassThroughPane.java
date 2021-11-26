@@ -45,8 +45,8 @@ public class EffectPassThroughPane extends Pane {
             setBackground(new Background(bgImage));
         }
 
-        double x = getLayoutX();
-        double y = getLayoutY();
+        double x = getLayoutX() + getTranslateX();
+        double y = getLayoutY() + getTranslateY();
 
         SnapshotParameters parameters = new SnapshotParameters();
         Rectangle2D rect = new Rectangle2D(

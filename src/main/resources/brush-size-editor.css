@@ -1,0 +1,34 @@
+.brush-size-editor {
+    -fx-spacing: 7.5;
+    -fx-alignment: center;
+    -fx-padding: 2.5;
+
+    -fx-font-size: 20;
+    -fx-font-family: Consolas;
+}
+
+.text-field {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-padding: 0;
+}
+
+.increment, .decrement {
+    -fx-cursor: hand;
+    -fx-padding: 2.5 5;
+    -fx-background-insets: 0;
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+
+    -fx-border-color: gray;
+}
+.decrement {
+    -fx-border-width: 0 1 0 0;
+}
+.increment {
+    -fx-border-width: 0 0 0 1;
+}
+
+.increment:hover, .decrement:hover, .text-field:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.1);
+}

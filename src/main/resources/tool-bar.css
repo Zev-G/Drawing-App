@@ -1,3 +1,7 @@
 .tool-bar {
     -fx-background-color: -main-bg;
+    -fx-border-color: #3c3c3c;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 5;
+    -fx-effect: dropshadow(three-pass-box, -near-black, 10, 0, 0, 0);
 }

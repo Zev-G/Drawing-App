@@ -27,7 +27,7 @@ public class DrawTool extends IconPreviewTool {
 
     private DoubleProperty brushSize = new SimpleDoubleProperty(this, "Brush Size", 15);
     private ObjectProperty<Brush> brush = new SimpleObjectProperty<>(new CircleBrush(this));
-    private ColorProperty brushColor = new ColorProperty(this, "Brush Color", Color.RED);
+    private ColorProperty brushColor = new ColorProperty(this, "Brush Color", Color.BLACK);
 
     private BooleanProperty currentlyDrawing = new SimpleBooleanProperty(false);
     private Set<PlotCanvas> effectedCanvases = new HashSet<>();
@@ -45,7 +45,7 @@ public class DrawTool extends IconPreviewTool {
 
         super.cursor.bind(Bindings.createObjectBinding(() -> getBrush().getCursor(), brush));
 
-        editableProperties.add(EditableProperty.create(brushSize, () -> new DoublePropertyEditor(brushSize)));
+        editableProperties.add(EditableProperty.create(brushSize, () -> new BrushSizeEditor(brushSize)));
         editableProperties.add(EditableProperty.create(brushColor, () -> new ColorPropertyEditor(brushColor)));
     }
 
