@@ -47,8 +47,8 @@ public class Drawing extends AnchorPane {
     private final ToolBar toolBar = new ToolBar(this);
     private final Pane cursorView = new Pane();
     private final StackPane body = new StackPane();
-    private final SideBar sideBar = new SideBar(this);
     private final StackPane layersView = new StackPane();
+    private final SideBar sideBar = new SideBar(this);
 
     private final ScaleEditor scaleEditor = new ScaleEditor(scale, this);
     
@@ -265,6 +265,10 @@ public class Drawing extends AnchorPane {
 
     public void setScale(double scale) {
         this.scale.set(scale);
+    }
+
+    public StackPane getLayersView() {
+        return layersView;
     }
 
 }

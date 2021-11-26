@@ -1,9 +1,12 @@
 package app;
 
+import app.misc.EffectPassThroughPane;
 import app.tools.Tool;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.effect.BoxBlur;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -16,10 +19,14 @@ public class SideBar extends StackPane {
     public SideBar(Drawing drawing) {
         this.drawing = drawing;
 
-        StackPane iconsGloss = new StackPane();
-        iconsGloss.setBackground(new Background(new BackgroundFill(Color.rgb(255, 255, 255, 0.8), new CornerRadii(10), Insets.EMPTY)));
-        iconsGloss.setEffect(new GaussianBlur(20));
+        EffectPassThroughPane iconsGloss = new EffectPassThroughPane(drawing.getLayersView());
+
+        BoxBlur blur = new BoxBlur(15, 15, 3);
+        iconsGloss.setEffect(blur);
+        blur.setInput(new ColorAdjust(0, 0, 0.4, 0));
+
         iconsGloss.setMouseTransparent(true);
+
         icons.setPadding(new Insets(10));
         icons.setAlignment(Pos.CENTER_LEFT);
         icons.setSpacing(10);

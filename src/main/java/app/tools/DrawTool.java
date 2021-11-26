@@ -9,6 +9,7 @@ import com.me.tmw.nodes.control.svg.SVG;
 import com.me.tmw.properties.ColorProperty;
 import com.me.tmw.properties.editors.ColorPropertyEditor;
 import com.me.tmw.properties.editors.DoublePropertyEditor;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
@@ -28,8 +29,6 @@ public class DrawTool extends IconPreviewTool {
     private ObjectProperty<Brush> brush = new SimpleObjectProperty<>(new CircleBrush(this));
     private ColorProperty brushColor = new ColorProperty(this, "Brush Color", Color.RED);
 
-    private final Circle cursor = new Circle();
-
     private BooleanProperty currentlyDrawing = new SimpleBooleanProperty(false);
     private Set<PlotCanvas> effectedCanvases = new HashSet<>();
 
@@ -44,10 +43,7 @@ public class DrawTool extends IconPreviewTool {
                 , 0.05));
         shortcut.set(KeyCombination.valueOf("B"));
 
-        cursor.radiusProperty().bind(brushSize.divide(2));
-        cursor.setStrokeWidth(1.5);
-        cursor.setStroke(Color.BLACK);
-        cursor.setFill(Color.TRANSPARENT);
+        super.cursor.bind(Bindings.createObjectBinding(() -> getBrush().getCursor(), brush));
 
         editableProperties.add(EditableProperty.create(brushSize, () -> new DoublePropertyEditor(brushSize)));
         editableProperties.add(EditableProperty.create(brushColor, () -> new ColorPropertyEditor(brushColor)));
@@ -164,11 +160,6 @@ public class DrawTool extends IconPreviewTool {
     @Override
     public boolean isDraggable(MouseEvent event) {
         return event.getButton() != MouseButton.PRIMARY || event.isShiftDown();
-    }
-
-    @Override
-    public Circle getCursor() {
-        return cursor;
     }
 
     public double getBrushSize() {
