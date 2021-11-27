@@ -3,6 +3,10 @@
     -off-text-fill: white;
 
     -main-bg: white;
+    -less-main-bg: #e6e6e6;
 
     -near-black: #1c1c1c;
+    -intermediate: #3c3c3c;
+
+    -fx-font-family: Consolas;
 }

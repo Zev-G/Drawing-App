@@ -1,0 +1,26 @@
+.layers-editor {
+    -fx-padding: 100 25;
+    -fx-alignment: top_right;
+
+    -fx-font-size: 15;
+
+    -fx-background-color: -less-main-bg;
+    -fx-border-color: -intermediate;
+    -fx-border-width: 0 0 0 1;
+    -fx-effect: dropshadow(three-pass-box, -near-black, 10, 0, 0, 0);
+}
+
+.layers-view {
+    -fx-alignment: bottom_right;
+    -fx-spacing: 10;
+}
+
+.layer-view {
+    -fx-padding: 15;
+    -fx-spacing: 10;
+    -fx-background-color: -main-bg;
+}
+
+.check-box {
+    -fx-background-color: transparent;
+}

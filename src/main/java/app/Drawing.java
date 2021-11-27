@@ -10,8 +10,9 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.input.KeyCode;
@@ -37,6 +38,17 @@ public class Drawing extends AnchorPane {
         }
     };
     private final ObservableList<Layer> layers = FXCollections.observableArrayList();
+    private final SelectionModel<Layer> layerSelectionModel = new SingleSelectionModel<>() {
+        @Override
+        protected Layer getModelItem(int i) {
+            return layers.get(i);
+        }
+
+        @Override
+        protected int getItemCount() {
+            return layers.size();
+        }
+    };
     private final NodeProperty cursor = new NodeProperty();
     private final SimpleDoubleProperty scale = new SimpleDoubleProperty(1);
 
@@ -49,6 +61,7 @@ public class Drawing extends AnchorPane {
     private final StackPane body = new StackPane();
     private final StackPane layersView = new StackPane();
     private final SideBar sideBar = new SideBar(this);
+    private final LayersEditor layersEditor = new LayersEditor(this);
 
     private final ScaleEditor scaleEditor = new ScaleEditor(scale, this);
     
@@ -92,6 +105,8 @@ public class Drawing extends AnchorPane {
         VBox.setVgrow(body, Priority.ALWAYS);
         BorderPane sideBarHolder = new BorderPane();
         sideBarHolder.setLeft(sideBar);
+
+//        sideBarHolder.setRight(layersEditor);
         sideBarHolder.setPickOnBounds(false);
         body.setPickOnBounds(false);
 
@@ -104,6 +119,11 @@ public class Drawing extends AnchorPane {
                 if (change.wasAdded()) {
                     for (Layer added : change.getAddedSubList()) {
                         layersView.getChildren().add(added.getView());
+//                        if (change.wasPermutated()) {
+//                            layersView.getChildren().add(change.getFrom(), added.getView());
+//                        } else {
+//                            layersView.getChildren().add(added.getView());
+//                        }
                     }
                 }
                 if (change.wasRemoved()) {
@@ -271,4 +291,7 @@ public class Drawing extends AnchorPane {
         return layersView;
     }
 
+    public SelectionModel<Layer> getLayerSelectionModel() {
+        return layerSelectionModel;
+    }
 }

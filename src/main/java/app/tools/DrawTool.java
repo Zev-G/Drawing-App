@@ -1,10 +1,7 @@
 package app.tools;
 
-import app.EditableProperty;
-import app.PaintLayer;
+import app.*;
 import app.history.CanvasEdit;
-import app.Drawing;
-import app.PlotCanvas;
 import com.me.tmw.nodes.control.svg.SVG;
 import com.me.tmw.properties.ColorProperty;
 import com.me.tmw.properties.editors.ColorPropertyEditor;
@@ -140,11 +137,17 @@ public class DrawTool extends IconPreviewTool {
     }
 
     private PaintLayer getTopPaintLayer() {
-        if (drawing.getLastLayer() instanceof PaintLayer) {
-            return (PaintLayer) drawing.getLastLayer();
+        Layer selected = drawing.getLayerSelectionModel().getSelectedItem();
+        if (selected instanceof PaintLayer) {
+            return (PaintLayer) selected;
         } else {
             PaintLayer newLayer = new PaintLayer(drawing);
-            drawing.getLayers().add(newLayer);
+            if (selected == null) {
+                drawing.getLayers().add(newLayer);
+            } else {
+                drawing.getLayers().add(drawing.getLayerSelectionModel().getSelectedIndex(), newLayer);
+            }
+            drawing.getLayerSelectionModel().select(newLayer);
             return newLayer;
         }
     }
