@@ -7,7 +7,7 @@ import javafx.scene.paint.Color;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PaintLayer extends Pane implements Layer {
+public class PaintLayer extends LayerBase {
 
     private static final boolean WHITE_CANVAS_BG = false;
     private static final double SIZE = 150;
@@ -15,13 +15,15 @@ public class PaintLayer extends Pane implements Layer {
     private final Map<Plot, PlotCanvas> canvasMap = new HashMap<>();
     private final Drawing drawing;
 
+    private final Pane pane = new Pane();
+
     public PaintLayer(Drawing drawing) {
         this.drawing = drawing;
     }
 
     @Override
     public Node getView() {
-        return this;
+        return pane;
     }
 
     public PlotCanvas find(double x, double y) {
@@ -43,7 +45,7 @@ public class PaintLayer extends Pane implements Layer {
             canvas.pushToHistory();
         }
         canvas.getGraphicsContext2D().setFill(Color.web("#7a362f"));
-        getChildren().add(canvas);
+        pane.getChildren().add(canvas);
         canvasMap.put(plot, canvas);
 
         return canvas;

@@ -87,6 +87,11 @@ public class Drawing extends AnchorPane {
             }
         });
 
+        layerSelectionModel.selectedItemProperty().addListener((observableValue, layer, t1) -> {
+            if (layer != null) layer.setSelected(false);
+            if (t1 != null) t1.setSelected(true);
+        });
+
         AnchorPane.setRightAnchor(scaleEditor, 10D);
         AnchorPane.setBottomAnchor(scaleEditor, 10D);
 
@@ -106,7 +111,7 @@ public class Drawing extends AnchorPane {
         BorderPane sideBarHolder = new BorderPane();
         sideBarHolder.setLeft(sideBar);
 
-//        sideBarHolder.setRight(layersEditor);
+        sideBarHolder.setRight(layersEditor);
         sideBarHolder.setPickOnBounds(false);
         body.setPickOnBounds(false);
 
@@ -119,6 +124,7 @@ public class Drawing extends AnchorPane {
                 if (change.wasAdded()) {
                     for (Layer added : change.getAddedSubList()) {
                         layersView.getChildren().add(added.getView());
+                        added.setDrawing(this);
 //                        if (change.wasPermutated()) {
 //                            layersView.getChildren().add(change.getFrom(), added.getView());
 //                        } else {
@@ -129,6 +135,7 @@ public class Drawing extends AnchorPane {
                 if (change.wasRemoved()) {
                     for (Layer removed : change.getAddedSubList()) {
                         layersView.getChildren().remove(removed.getView());
+                        if (removed.getDrawing() == this) removed.setDrawing(null);
                     }
                 }
             }

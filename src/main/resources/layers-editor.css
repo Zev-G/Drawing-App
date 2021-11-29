@@ -12,15 +12,47 @@
 
 .layers-view {
     -fx-alignment: bottom_right;
-    -fx-spacing: 10;
+    -fx-spacing: -1;
 }
 
 .layer-view {
-    -fx-padding: 15;
+    -fx-padding: 10;
     -fx-spacing: 10;
     -fx-background-color: -main-bg;
+    -fx-border-color: -near-black;
+    -fx-border-width: 1;
+}
+
+.layer-view:hover {
+    -fx-background-color: -light-highlight-color;
+}
+.layer-view:selected {
+    -fx-background-color: -darker-highlight-color;
+}
+.layer-view:selected:hover {
+    -fx-background-color: -darkest-highlight-color;
+}
+.layer-view:selected > .label {
+    -fx-text-fill: white;
+}
+
+.check-box > .box > .mark {
+    -fx-background-color: transparent;
+}
+.check-box:selected > .box > .mark {
+    -fx-background-color: -near-black;
+}
+
+.layer-view:selected > .check-box:selected > .box > .mark {
+    -fx-background-color: white;
+}
+
+.check-box, .check-box > .box {
+    -fx-background-color: transparent;
 }
 
 .check-box {
-    -fx-background-color: transparent;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-border-color: -near-black;
 }

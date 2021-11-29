@@ -5,6 +5,10 @@
     -main-bg: white;
     -less-main-bg: #e6e6e6;
 
+    -light-highlight-color: #6aaae6;
+    -darker-highlight-color: #556fe0;
+    -darkest-highlight-color: #474ccc;
+
     -near-black: #1c1c1c;
     -intermediate: #3c3c3c;
 
