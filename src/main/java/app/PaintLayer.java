@@ -35,7 +35,7 @@ public class PaintLayer extends LayerBase {
         Plot plot = new Plot(plotX, plotY);
         if (canvasMap.containsKey(plot)) return canvasMap.get(plot);
 
-        PlotCanvas canvas = new PlotCanvas(SIZE, SIZE, drawing);
+        PlotCanvas canvas = new PlotCanvas(SIZE + 1, SIZE + 1, drawing);
         canvas.setX(plotX * SIZE);
         canvas.setY(plotY * SIZE);
         if (WHITE_CANVAS_BG) {

@@ -60,6 +60,7 @@ public class Drawing extends AnchorPane {
     private final Pane cursorView = new Pane();
     private final StackPane body = new StackPane();
     private final StackPane layersView = new StackPane();
+    private final StackPane unscaledLayerView = new StackPane(layersView);
     private final SideBar sideBar = new SideBar(this);
     private final LayersEditor layersEditor = new LayersEditor(this);
 
@@ -113,9 +114,9 @@ public class Drawing extends AnchorPane {
 
         sideBarHolder.setRight(layersEditor);
         sideBarHolder.setPickOnBounds(false);
-        body.setPickOnBounds(false);
+//        body.setPickOnBounds(false);
 
-        body.getChildren().addAll(layersView, cursorView, sideBarHolder);
+        body.getChildren().addAll(unscaledLayerView, cursorView, sideBarHolder);
 
         this.cursorView.setMouseTransparent(true);
 
