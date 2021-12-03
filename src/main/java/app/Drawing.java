@@ -122,21 +122,16 @@ public class Drawing extends AnchorPane {
 
         layers.addListener((ListChangeListener<Layer>) change -> {
             while (change.next()) {
-                if (change.wasAdded()) {
-                    for (Layer added : change.getAddedSubList()) {
-                        layersView.getChildren().add(added.getView());
-                        added.setDrawing(this);
-//                        if (change.wasPermutated()) {
-//                            layersView.getChildren().add(change.getFrom(), added.getView());
-//                        } else {
-//                            layersView.getChildren().add(added.getView());
-//                        }
-                    }
-                }
                 if (change.wasRemoved()) {
-                    for (Layer removed : change.getAddedSubList()) {
+                    for (Layer removed : change.getRemoved()) {
                         layersView.getChildren().remove(removed.getView());
                         if (removed.getDrawing() == this) removed.setDrawing(null);
+                    }
+                }
+                if (change.wasAdded()) {
+                    for (Layer added : change.getAddedSubList()) {
+                        layersView.getChildren().add(layers.indexOf(added), added.getView());
+                        added.setDrawing(this);
                     }
                 }
             }
