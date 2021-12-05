@@ -1,5 +1,6 @@
-package app;
+package app.layers;
 
+import app.Drawing;
 import com.me.tmw.nodes.util.NodeMisc;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;

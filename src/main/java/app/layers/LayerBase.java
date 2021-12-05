@@ -1,5 +1,6 @@
-package app;
+package app.layers;
 
+import app.Drawing;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;

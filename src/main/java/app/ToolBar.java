@@ -1,5 +1,6 @@
 package app;
 
+import app.misc.Res;
 import javafx.scene.layout.HBox;
 
 public class ToolBar extends HBox {

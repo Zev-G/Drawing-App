@@ -1,5 +1,8 @@
-package app;
+package app.layers;
 
+import app.Drawing;
+import app.Plot;
+import app.PlotCanvas;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -10,7 +13,7 @@ import java.util.Map;
 public class PaintLayer extends LayerBase {
 
     private static final boolean WHITE_CANVAS_BG = false;
-    private static final double SIZE = 150;
+    private static final double SIZE = 500;
 
     private final Map<Plot, PlotCanvas> canvasMap = new HashMap<>();
     private final Drawing drawing;
@@ -19,6 +22,7 @@ public class PaintLayer extends LayerBase {
 
     public PaintLayer(Drawing drawing) {
         this.drawing = drawing;
+        pane.setSnapToPixel(false);
     }
 
     @Override

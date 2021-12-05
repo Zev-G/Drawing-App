@@ -10,6 +10,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setScene(new DevScene(new Drawing()));
         primaryStage.show();
+        primaryStage.setMaximized(true);
     }
 
     public static void main(String[] args) {

@@ -12,16 +12,16 @@ public class PlotCanvas extends Canvas {
 
     private final DoubleProperty x = new SimpleDoubleProperty();
     private final DoubleProperty y = new SimpleDoubleProperty();
-    private final Drawing infiniDraw;
+    private final Drawing drawing;
 
     private final Stack<Image> history = new Stack<>();
 
-    public PlotCanvas(double w, double h, Drawing draw) {
+    public PlotCanvas(double w, double h, Drawing drawing) {
         super(w, h);
-        this.infiniDraw = draw;
+        this.drawing = drawing;
 
-        layoutXProperty().bind(x.add(infiniDraw.xOffsetProperty()));
-        layoutYProperty().bind(y.add(infiniDraw.yOffsetProperty()));
+        layoutXProperty().bind(x.add(drawing.xOffsetProperty()));
+        layoutYProperty().bind(y.add(drawing.yOffsetProperty()));
     }
 
     public double getX() {
@@ -48,8 +48,8 @@ public class PlotCanvas extends Canvas {
         this.y.set(y);
     }
 
-    public Drawing getInfiniDraw() {
-        return infiniDraw;
+    public Drawing getDrawing() {
+        return drawing;
     }
 
     public Stack<Image> getHistory() {

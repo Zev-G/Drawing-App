@@ -1,13 +1,11 @@
 package app;
 
 import app.misc.FlatButton;
-import com.me.tmw.properties.editors.DoublePropertyEditor;
+import app.misc.Res;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
-import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.shape.Rectangle;
 

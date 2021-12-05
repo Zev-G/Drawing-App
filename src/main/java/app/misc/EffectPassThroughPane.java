@@ -1,12 +1,9 @@
 package app.misc;
 
-import app.Settings;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.effect.BoxBlur;
-import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.*;
 

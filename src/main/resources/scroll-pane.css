@@ -1,0 +1,9 @@
+.no-buttons > .scroll-bar > .increment-button,
+.no-buttons > .scroll-bar > .decrement-button {
+    -fx-padding: 0;
+}
+.no-buttons > .scroll-bar > .increment-button > .increment-arrow,
+.no-buttons > .scroll-bar > .decrement-button > .decrement-arrow {
+    -fx-padding: 0;
+    -fx-shape: none;
+}

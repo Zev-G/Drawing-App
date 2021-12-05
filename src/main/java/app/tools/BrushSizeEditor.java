@@ -1,15 +1,12 @@
 package app.tools;
 
-import app.Res;
+import app.misc.Res;
 import app.misc.FlatButton;
-import com.me.tmw.nodes.control.svg.SVG;
-import com.me.tmw.nodes.util.NodeMisc;
 import com.me.tmw.properties.editors.DoublePropertyEditor;
 import com.me.tmw.properties.editors.PropertyEditorBase;
 import javafx.beans.property.Property;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 
 public class BrushSizeEditor extends PropertyEditorBase<Number> {
 

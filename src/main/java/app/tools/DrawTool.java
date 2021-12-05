@@ -2,6 +2,8 @@ package app.tools;
 
 import app.*;
 import app.history.CanvasEdit;
+import app.layers.Layer;
+import app.layers.PaintLayer;
 import com.me.tmw.nodes.control.svg.SVG;
 import com.me.tmw.properties.ColorProperty;
 import com.me.tmw.properties.editors.ColorPropertyEditor;
@@ -44,6 +46,12 @@ public class DrawTool extends IconPreviewTool {
 
         editableProperties.add(EditableProperty.create(brushSize, () -> new BrushSizeEditor(brushSize)));
         editableProperties.add(EditableProperty.create(brushColor, () -> new ColorPropertyEditor(brushColor)));
+
+        brushSize.addListener(observable -> {
+            if (getBrushSize() > 250) {
+                setBrushSize(250);
+            }
+        });
     }
 
     @Override

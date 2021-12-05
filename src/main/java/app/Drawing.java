@@ -1,6 +1,11 @@
 package app;
 
 import app.history.Edit;
+import app.layers.Layer;
+import app.layers.LayersEditor;
+import app.layers.PaintLayer;
+import app.misc.Res;
+import app.misc.Sheets;
 import app.tools.DrawTool;
 import app.tools.MovingTool;
 import app.tools.Tool;
@@ -11,10 +16,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionModel;
-import javafx.scene.control.SingleSelectionModel;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 
@@ -60,9 +62,10 @@ public class Drawing extends AnchorPane {
     private final Pane cursorView = new Pane();
     private final StackPane body = new StackPane();
     private final StackPane layersView = new StackPane();
-    private final StackPane unscaledLayerView = new StackPane(layersView);
+    private final StackPane unscaledLayerView = new StackPane(layersView, cursorView);
     private final SideBar sideBar = new SideBar(this);
     private final LayersEditor layersEditor = new LayersEditor(this);
+    private final SplitPane bodySplit = new SplitPane(unscaledLayerView, layersEditor);
 
     private final ScaleEditor scaleEditor = new ScaleEditor(scale, this);
     
@@ -75,6 +78,11 @@ public class Drawing extends AnchorPane {
     public Drawing() {
         getChildren().addAll(body, toolBar, scaleEditor);
         getStylesheets().add(STYLE_SHEET);
+
+        bodySplit.getStylesheets().add(Sheets.SPLIT_PANE);
+        bodySplit.getStyleClass().add("no-dividers");
+
+        SplitPane.setResizableWithParent(layersEditor, false);
 
         cursor.addListener(observable -> {
             cursorView.getChildren().clear();
@@ -112,11 +120,10 @@ public class Drawing extends AnchorPane {
         BorderPane sideBarHolder = new BorderPane();
         sideBarHolder.setLeft(sideBar);
 
-        sideBarHolder.setRight(layersEditor);
         sideBarHolder.setPickOnBounds(false);
 //        body.setPickOnBounds(false);
 
-        body.getChildren().addAll(unscaledLayerView, cursorView, sideBarHolder);
+        body.getChildren().addAll(bodySplit, sideBarHolder);
 
         this.cursorView.setMouseTransparent(true);
 
@@ -126,6 +133,11 @@ public class Drawing extends AnchorPane {
                     for (Layer removed : change.getRemoved()) {
                         layersView.getChildren().remove(removed.getView());
                         if (removed.getDrawing() == this) removed.setDrawing(null);
+                        if (getLayerSelectionModel().getSelectedItem() == removed) {
+                            if (getLayers().isEmpty()) {
+                                getLayerSelectionModel().select(null);
+                            }
+                        }
                     }
                 }
                 if (change.wasAdded()) {
@@ -133,9 +145,14 @@ public class Drawing extends AnchorPane {
                         layersView.getChildren().add(layers.indexOf(added), added.getView());
                         added.setDrawing(this);
                     }
+                    if (change.getAddedSize() == layers.size() && layerSelectionModel.getSelectedItem() == null) {
+                        layerSelectionModel.select(0);
+                    }
                 }
             }
         });
+        getLayers().add(new PaintLayer(this));
+        getLayerSelectionModel().select(0);
 
         tools.addAll(new DrawTool(this), new MovingTool(this));
 
@@ -163,8 +180,10 @@ public class Drawing extends AnchorPane {
             getSelectedTool().handleMousePressed(event);
             requestFocus();
         });
-        body.setOnMouseMoved(event -> updateCursor(event.getX(), event.getY()));
-        body.setOnMouseDragged(event -> updateCursor(event.getX(), event.getY()));
+
+        unscaledLayerView.setOnMouseMoved(event -> updateCursor(event.getX(), event.getY()));
+        unscaledLayerView.setOnMouseDragged(event -> updateCursor(event.getX(), event.getY()));
+
         setFocusTraversable(true);
         setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.Z && event.isControlDown() && !history.isEmpty()) {
