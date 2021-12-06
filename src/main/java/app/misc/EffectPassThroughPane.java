@@ -1,6 +1,8 @@
 package app.misc;
 
+import com.me.tmw.nodes.util.NodeMisc;
 import javafx.animation.AnimationTimer;
+import javafx.css.PseudoClass;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.SnapshotParameters;
@@ -8,6 +10,8 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.*;
 
 public class EffectPassThroughPane extends Pane {
+
+    private static final PseudoClass PAUSED = PseudoClass.getPseudoClass("paused");
 
     private final Parent container;
 
@@ -24,7 +28,15 @@ public class EffectPassThroughPane extends Pane {
             }
         };
 
-        if (Settings.USE_GLOSS_EFFECT) timer.start();
+        NodeMisc.runAndAddListener(Settings.USE_GLOSS_EFFECT, observable -> {
+            if (Settings.isUseGlossEffect()) {
+                timer.start();
+                pseudoClassStateChanged(PAUSED, true);
+            } else {
+                timer.stop();
+                pseudoClassStateChanged(PAUSED, false);
+            }
+         });
     }
 
     private void updateBackground() {

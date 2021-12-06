@@ -1,6 +1,7 @@
 package app;
 
 import app.misc.EffectPassThroughPane;
+import app.misc.Settings;
 import app.tools.Tool;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
@@ -20,6 +21,7 @@ public class SideBar extends StackPane {
         this.drawing = drawing;
 
         EffectPassThroughPane iconsGloss = new EffectPassThroughPane(drawing.getLayersView());
+
         iconsGloss.setTranslateX(-7.5);
 
         BoxBlur blur = new BoxBlur(15, 15, 3);

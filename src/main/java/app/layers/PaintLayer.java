@@ -22,7 +22,7 @@ public class PaintLayer extends LayerBase {
 
     public PaintLayer(Drawing drawing) {
         this.drawing = drawing;
-        pane.setSnapToPixel(false);
+//        pane.setSnapToPixel(tr);
     }
 
     @Override

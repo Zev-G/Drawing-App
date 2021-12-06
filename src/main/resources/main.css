@@ -14,3 +14,7 @@
 
     -fx-font-family: Consolas;
 }
+
+.effect-pass-through-pane:paused {
+    -fx-background-color: -main-bg;
+}
