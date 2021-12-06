@@ -1,0 +1,5 @@
+.color-display {
+    -fx-stroke-width: 3;
+    -fx-stroke: -near-black;
+    -fx-cursor: hand;
+}

@@ -45,7 +45,7 @@ public class DrawTool extends IconPreviewTool {
         super.cursor.bind(Bindings.createObjectBinding(() -> getBrush().getCursor(), brush));
 
         editableProperties.add(EditableProperty.create(brushSize, () -> new BrushSizeEditor(brushSize)));
-        editableProperties.add(EditableProperty.create(brushColor, () -> new ColorPropertyEditor(brushColor)));
+        editableProperties.add(EditableProperty.create(brushColor, () -> new BrushColorEditor(brushColor)));
 
         brushSize.addListener(observable -> {
             if (getBrushSize() > 250) {

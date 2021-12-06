@@ -3,5 +3,6 @@
     -fx-border-color: -intermediate;
     -fx-border-width: 0 0 1 0;
     -fx-padding: 5;
+    -fx-spacing: 30;
     -fx-effect: dropshadow(three-pass-box, -near-black, 10, 0, 0, 0);
 }

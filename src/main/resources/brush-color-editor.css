@@ -1,0 +1,26 @@
+.add-preset {
+    -fx-font-size: 20;
+    -fx-alignment: center;
+    -fx-cursor: hand;
+}
+
+.add-preset > .label {
+    -fx-padding: 0;
+}
+
+.add-preset-circle {
+    -fx-stroke-width: 3;
+    -fx-stroke: -near-black;
+    -fx-fill: transparent;
+}
+
+.presets {
+    -fx-border-color: -near-black;
+    -fx-border-width: 0 0 0 1;
+    -fx-spacing: 5;
+    -fx-padding: 0 0 0 5;
+}
+
+.brush-color-editor {
+    -fx-spacing: 5;
+}
