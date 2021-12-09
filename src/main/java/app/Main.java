@@ -9,11 +9,11 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setScene(new DevScene(new Drawing()));
+//        primaryStage.setScene(new DevScene(new Drawing()));
         primaryStage.show();
-        primaryStage.setMaximized(true);
+//        primaryStage.setMaximized(true);
 
-//        new ColorEyedropper().display(primaryStage);
+        new ColorEyedropper().display(primaryStage);
     }
 
     public static void main(String[] args) {

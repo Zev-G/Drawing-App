@@ -1,6 +1,11 @@
 package app.misc;
 
 import javafx.animation.AnimationTimer;
+import javafx.geometry.Insets;
+import javafx.scene.control.Label;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.robot.Robot;
@@ -16,11 +21,13 @@ public class ColorEyedropper extends Popup {
     private final Path shape = new Path();
     private final Robot robot = new Robot();
 
-    private final double size = 20;
+    private final double size = 30;
 
     private final double height = size;
     private final double pointHeight = size * 0.3;
     private final double width = height - pointHeight;
+
+    private static final Color OFFSET = Color.rgb(128, 128, 128, 0.01);
 
     public ColorEyedropper() {
         shape.getElements().addAll(
@@ -29,19 +36,25 @@ public class ColorEyedropper extends Popup {
         );
         shape.setStroke(Color.BLACK);
         shape.setStrokeWidth(2);
+        setAutoFix(false);
         Region region = new Region() {
             {
                 getChildren().add(shape);
-                Line line = new Line();
-                setMinHeight(height + 20);
-                setStyle("-fx-background-color: transparent;");
+                setMinHeight(height + 50);
+                shape.setLayoutX(50);
+                setMinWidth(100);
             }
         };
+        region.setBackground(new Background(new BackgroundFill(OFFSET, CornerRadii.EMPTY, Insets.EMPTY)));
         region.setPickOnBounds(true);
         getContent().add(region);
 
 
-        region.setOnMousePressed(mouseEvent -> hide());
+        region.setOnMouseReleased(mouseEvent -> {
+            hide();
+            Color color = (Color) shape.getFill();
+            System.out.println(color.getRed() * 255 + " " + color.getGreen() * 255 + " " + color.getBlue() * 255);
+        });
         shape.setPickOnBounds(true);
 
         AnimationTimer timer = new AnimationTimer() {
@@ -62,8 +75,8 @@ public class ColorEyedropper extends Popup {
     }
 
     private void update(double screenX, double screenY) {
-        setX(screenX - width / 2);
-        setY(screenY - getHeight() + 10);
+        setX(screenX - width / 2 - 50);
+        setY(screenY - getHeight() + 40);
 
         shape.setFill(robot.getPixelColor(screenX, screenY));
     }
