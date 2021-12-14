@@ -6,15 +6,12 @@ import app.layers.Layer;
 import app.layers.PaintLayer;
 import com.me.tmw.nodes.control.svg.SVG;
 import com.me.tmw.properties.ColorProperty;
-import com.me.tmw.properties.editors.ColorPropertyEditor;
-import com.me.tmw.properties.editors.DoublePropertyEditor;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -86,8 +83,11 @@ public class DrawTool extends IconPreviewTool {
 
     @Override
     public void handleMouseReleased(MouseEvent event) {
-        if (!effectedCanvases.isEmpty()) drawing.getHistory().add(new CanvasEdit(effectedCanvases));
+        double scale = drawing.getScale();
+        drawing.setScale(1);
+        if (!effectedCanvases.isEmpty()) drawing.getHistory().add(new CanvasEdit(effectedCanvases, drawing));
         currentlyDrawing.set(false);
+        drawing.setScale(scale);
     }
 
     private void drawBetween(double xOld, double yOld, double x, double y) {
