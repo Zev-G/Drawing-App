@@ -12,6 +12,9 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,7 +29,6 @@ public class DrawTool extends IconPreviewTool {
     private ColorProperty brushColor = new ColorProperty(this, "Brush Color", Color.BLACK);
 
     private BooleanProperty currentlyDrawing = new SimpleBooleanProperty(false);
-    private Set<PlotCanvas> effectedCanvases = new HashSet<>();
 
     private double lastDrawX;
     private double lastDrawY;
@@ -54,7 +56,6 @@ public class DrawTool extends IconPreviewTool {
     @Override
     public void handleMousePressed(MouseEvent event) {
         currentlyDrawing.set(true);
-        effectedCanvases = new HashSet<>();
         lastDrawX = event.getX() - getBrushSize() / 2;
         lastDrawY = event.getY() - getBrushSize() / 2;
         handleMouseDragged(event);
@@ -65,16 +66,15 @@ public class DrawTool extends IconPreviewTool {
         if (!isDraggable(event) && isCurrentlyDrawing()) {
             double x = event.getX() - getBrushSize() / 2;
             double y = event.getY() - getBrushSize() / 2;
-            if (DRAW_BETWEEN) {
-                drawBetween(lastDrawX, lastDrawY, x, y);
+            PaintLayer paintLayer = getTopPaintLayer();
+            if (paintLayer.getCurrentPath() == null) {
+                Path path = new Path();
+                path.strokeWidthProperty().bind(brushSize);
+                paintLayer.setCurrentPath(path);
+                path.getElements().add(new MoveTo(x, y));
             } else {
-                if (DRAW_THROUGH_CANVASES) {
-                    draw(x, y);
-                } else {
-                    PlotCanvas canvas = getTopPaintLayer().find(x, y);
-                    effectedCanvases.add(canvas);
-                    drawRelative(canvas, x, y);
-                }
+                Path path = paintLayer.getCurrentPath();
+                path.getElements().add(new LineTo(x, y));
             }
             lastDrawX = x;
             lastDrawY = y;
@@ -85,63 +85,10 @@ public class DrawTool extends IconPreviewTool {
     public void handleMouseReleased(MouseEvent event) {
         double scale = drawing.getScale();
         drawing.setScale(1);
-        if (!effectedCanvases.isEmpty()) drawing.getHistory().add(new CanvasEdit(effectedCanvases, drawing));
+        PaintLayer layer = getTopPaintLayer();
+        layer.setCurrentPath(null);
         currentlyDrawing.set(false);
         drawing.setScale(scale);
-    }
-
-    private void drawBetween(double xOld, double yOld, double x, double y) {
-        Brush brush = getBrush();
-        double w = brush.getWidth();
-        double h = brush.getHeight();
-
-        double step = Math.sqrt(Math.pow(w / 6, 2) + Math.pow(h / 6, 2));
-        double hyp = Math.sqrt(Math.pow(x - xOld, 2) + Math.pow(y - yOld, 2));
-        if (hyp > step) {
-            double deg = Math.atan((x - xOld) / (y - yOld));
-
-            boolean xNeg = x - xOld < 0;
-            boolean yNeg = y - yOld < 0;
-
-            double xStep = Math.sin(deg) * step;
-            if ((xNeg && yNeg) || (!xNeg && yNeg)) xStep *= -1;
-            double yStep = Math.cos(deg) * step;
-            if (yNeg) yStep *= -1;
-
-            double newX = xOld;
-            double newY = yOld;
-            do {
-                newX += xStep;
-                newY += yStep;
-                draw(newX, newY);
-                hyp = Math.sqrt(Math.pow(x - newX, 2) + Math.pow(y - newY, 2));
-            } while (hyp > step);
-        } else {
-            draw(x, y);
-        }
-    }
-
-    private void draw(double x, double y) {
-        Brush brush = getBrush();
-        double w = brush.getWidth();
-        double h = brush.getHeight();
-
-        PaintLayer layer = getTopPaintLayer();
-        PlotCanvas topLeft = layer.find(x - w, y - h);
-        PlotCanvas topRight = layer.find(x + w, y - h);
-        PlotCanvas bottomLeft = layer.find(x - w, y + h);
-        PlotCanvas bottomRight = layer.find(x + w, y + h);
-        Set<PlotCanvas> unique = new HashSet<>();
-        unique.add(topLeft);
-        unique.add(topRight);
-        unique.add(bottomLeft);
-        unique.add(bottomRight);
-        for (PlotCanvas canvas : unique) {
-            drawRelative(canvas, x, y);
-            if (currentlyDrawing.get()) {
-                effectedCanvases.add(canvas);
-            }
-        }
     }
 
     private PaintLayer getTopPaintLayer() {
