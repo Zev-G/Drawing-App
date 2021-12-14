@@ -23,4 +23,21 @@
 
 .brush-color-editor {
     -fx-spacing: 5;
+    -fx-alignment: center;
+}
+
+.eye-dropper {
+    -fx-cursor: hand;
+    -fx-opacity: 0.8;
+}
+
+.eye-dropper:hover {
+    -fx-opacity: 1;
+}
+
+.eye-dropper > * {
+    -fx-fill: transparent;
+    -fx-stroke-width: 2;
+    -fx-stroke-line-cap: round;
+    -fx-stroke: black;
 }
