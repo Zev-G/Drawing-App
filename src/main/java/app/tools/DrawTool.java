@@ -15,6 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
+import javafx.scene.shape.StrokeLineCap;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -70,9 +71,12 @@ public class DrawTool extends IconPreviewTool {
             if (paintLayer.getCurrentPath() == null) {
                 Path path = new Path();
                 path.strokeWidthProperty().bind(brushSize);
+                path.strokeProperty().bind(brushColor);
                 paintLayer.setCurrentPath(path);
+                path.setFill(Color.TRANSPARENT);
+                path.setStrokeLineCap(StrokeLineCap.ROUND);
                 path.getElements().add(new MoveTo(x, y));
-            } else {
+            } else if (lastDrawX != x || lastDrawY != y) {
                 Path path = paintLayer.getCurrentPath();
                 path.getElements().add(new LineTo(x, y));
             }
